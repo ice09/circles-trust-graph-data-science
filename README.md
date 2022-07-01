@@ -2,7 +2,7 @@
 
 This repository contains a `docker-compose.yml` with
 
-* The REST API Interface (**Port 9090**)
+* The REST API Interface (**Port 8080**)
 * Neo4j Graph Database (**Port 8567**)
 
 ## Build
@@ -173,3 +173,24 @@ RETURN truster.address AS truster_address,truster.name as truster_name,truster.i
 ```
 2. "Export CSV" in table view
 3. Replace "null" with ""
+
+#### Fix import errors (OutOfMemoryException)
+
+* Increase `NEO4J_dbms_memory_heap_max__size`, in `docker-compose.yml`
+
+`NEO4J_dbms_memory_heap_max__size=4G`
+
+* Use Periodic Commits
+
+```
+:auto USING PERIODIC COMMIT 10000
+
+LOAD CSV WITH HEADERS FROM 'file:///export.csv' AS row
+
+MERGE (u1:User {address: row.truster_address})
+SET u1.name = row.truster_name, u1.image_url = row.truster_image_url
+MERGE (u2:User {address: row.trustee_address})
+SET u2.name = row.trustee_name, u2.image_url = row.trustee_image_url
+MERGE (u1)-[r:TRUSTS]->(u2)
+SET r.blockNumber = toInteger(row.blockNumber), r.amount = toFloat(row.amount);
+  
