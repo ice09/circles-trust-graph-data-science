@@ -77,7 +77,7 @@ public class UserController {
         if (StringUtils.hasText(name)) {
             List<Map<String, Object>> filteredForName = new ArrayList<>();
             for (Map<String, Object> map : cachedPagerank) {
-                if (map.get("User1").toString().equals(name) || map.get("User2").toString().equals(name)) {
+                if (map.containsKey("name") && map.get("name")!= null && map.get("name").toString().equals(name)) {
                     filteredForName.add(map);
                 }
             }
@@ -95,7 +95,7 @@ public class UserController {
         if (StringUtils.hasText(name)) {
             List<Map<String, Object>> filteredForName = new ArrayList<>();
             for (Map<String, Object> map : cachedBet) {
-                if (map.get("User1").toString().equals(name) || map.get("User2").toString().equals(name)) {
+                if ((map.get("name") != null) && map.get("name").toString().equals(name)) {
                     filteredForName.add(map);
                 }
             }
