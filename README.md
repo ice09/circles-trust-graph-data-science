@@ -118,6 +118,7 @@ YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).address AS address, gds.util.asNode(nodeId).name AS name, score
 ORDER BY score DESC, name ASC
 ```
+* see https://neo4j.com/docs/graph-data-science/current/algorithms/page-rank/
 
 **Node Similarity**: `GET /similarity?name=username`
 
