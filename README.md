@@ -3,7 +3,7 @@
 This repository contains a `docker-compose.yml` with
 
 * The REST API Interface (**Port 8080**)
-* Neo4j Graph Database (**Port 8567**)
+* Neo4j Graph Database (**Ports 7867, 7474**)
 
 ## Build
 
