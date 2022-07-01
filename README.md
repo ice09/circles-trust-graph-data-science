@@ -56,33 +56,93 @@ DELETE t
 
 ## Querying the Trust Graph
 
-### Graph Data Sciene (GDS)
+### Truster & Trustees
+
+**Get all trusters of user {name}**: `GET /trusters/{name}`
+
+*Cypher* 
+```
+MATCH (u1:User)<-[:TRUSTS]-(u2:User) 
+WHERE u1.name=$name 
+RETURN u1 as trustee, collect(u2) as trusters
+```
+
+**Get all trustees of user {name}**: `GET /trustees/{name}`
+
+*Cypher*
+```
+MATCH (u1:User)-[:TRUSTS]->(u2:User) 
+WHERE u1.name=$name 
+RETURN u1 as truster, collect(u2) as trustees
+```
+
+**Get recommendations by triadic closure for user {name}**: `GET /recommendations/{name}`
+
+*Cypher*
+```
+MATCH (u1:User)<-[t1:TRUSTS]-(u2:User)-[t2:TRUSTS]->(u3:User) 
+WHERE u1.name=$NAME AND NOT EXISTS( (u1)-[:TRUSTS]->(u3) ) 
+RETURN u3
+```
+### Trust Path Traversal
+
+**Get shortest path from {sender} to {receiver} as usernames**: `GET /path/names/{sender}/{receiver}`
+
+*Cypher*
+```
+MATCH path = shortestPath( (you:User {name:$SENDER})-[*]->(other:User {name:$RECEIVER}) )
+WHERE all(r IN relationships(path) WHERE (r.amount>0))
+RETURN nodes(path)
+```
+
+**Get shortest path from {sender} to {receiver} as addresses**: `GET /path/addr/{sender}/{receiver}`
+
+*Cypher*
+```
+MATCH path = shortestPath( (you:User {address:$SENDER})-[*]->(other:User {address:$RECEIVER}) )
+WHERE all(r IN relationships(path) WHERE (r.amount>0))
+RETURN nodes(path)
+```
+
+### Graph Data Science (GDS)
 
 #### Initial  Setup: Create GDS Projection
 `CALL gds.graph.create('circles', 'User', 'TRUSTS')`
 
-#### GDS Queries
+**Pagerank**: `GET /pagerank?name=username`
 
-**Node Similarity**
+*Cypher*
+```
+CALL gds.pageRank.stream('circles')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).address AS address, gds.util.asNode(nodeId).name AS name, score
+ORDER BY score DESC, name ASC
+```
 
+**Node Similarity**: `GET /similarity?name=username`
+
+*Cypher*
 ```
 CALL gds.nodeSimilarity.stream('circles') YIELD node1, node2, similarity 
-WHERE gds.util.asNode(node1).name IS NOT NULL AND NOT gds.util.asNode(node1).name STARTS WITH '0x' AND gds.util.asNode(node2).name IS NOT NULL AND NOT gds.util.asNode(node2).name STARTS WITH '0x'
 RETURN gds.util.asNode(node1).name AS User1, gds.util.asNode(node2).name AS User2, similarity 
 ORDER BY similarity DESCENDING, User1, User2
 ```
 
-* https://neo4j.com/docs/graph-data-science/current/algorithms/betweenness-centrality/
+* see https://neo4j.com/docs/graph-data-science/current/algorithms/betweenness-centrality/
 
-**Betweeness**
+**Betweeness**: `GET /betweenness?name=username`
+
+*Cypher*
 ```
 CALL gds.betweenness.stream('circles') YIELD nodeId, score 
 RETURN gds.util.asNode(nodeId).name AS name, score ORDER  BY name ASC
 ```
 
-* https://neo4j.com/docs/graph-data-science/current/algorithms/node-similarity/
+* see https://neo4j.com/docs/graph-data-science/current/algorithms/node-similarity/
 
-### Cypher Queries for Recommendations
+### References
+
+#### Cypher Queries for Recommendations
 
 #### People who trust your Trustees and who are not trusted by you (Triadic Closure)
 ```
