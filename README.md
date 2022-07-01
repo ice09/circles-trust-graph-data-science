@@ -3,7 +3,7 @@
 This repository contains a `docker-compose.yml` with
 
 * The REST API Interface (**Port 8080**)
-* Neo4j Graph Database (**Ports 7867, 7474**)
+* Neo4j Graph Database (**Ports 7687, 7474**)
 
 ## Build
 
@@ -17,7 +17,7 @@ This repository contains a `docker-compose.yml` with
 ## Setup
 
 * Install Neo4j Desktop
-* Connect to the locally running neo4j at `neo4j://localhost:7867` with `neo4j/neo4j`
+* Connect to the locally running neo4j at `neo4j://localhost:7687` with `neo4j/neo4j`
 * Change password after initial connect tp `neo4j/q`
 
 ![](https://i.imgur.com/e9yeiEU.png)
