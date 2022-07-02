@@ -178,7 +178,7 @@ RETURN truster.address AS truster_address,truster.name as truster_name,truster.i
 
 * Increase `NEO4J_dbms_memory_heap_max__size`, in `docker-compose.yml`
 
-`NEO4J_dbms_memory_heap_max__size=4G`
+`NEO4J_dbms_memory_heap_max__size=XXXG`
 
 * Use Periodic Commits
 
