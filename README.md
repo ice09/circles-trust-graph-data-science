@@ -108,6 +108,8 @@ RETURN nodes(path)
 
 #### Initial  Setup: Create GDS Projection
 `CALL gds.graph.create('circles', 'User', 'TRUSTS')`
+OR
+`CALL gds.graph.project('circles', 'User', 'TRUSTS')`
 
 **Pagerank**: `GET /pagerank?name=username`
 
