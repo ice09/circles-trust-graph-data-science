@@ -4,8 +4,8 @@ services:
   neo4j:
     image: neo4j:latest
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
     environment:
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*
       - NEO4J_dbms_security_procedures_whitelist=apoc.*,gds.*
@@ -17,7 +17,13 @@ services:
       - ./volume/plugins:/plugins
       - ./volume/data:/data
       - ./volume/import:/import
+    networks:
+      - crcneo
   circles:
     image: circles-stats-web-proxy:0.0.1-SNAPSHOT
     ports:
       - "8080:8080"
+    networks:
+      - crcneo
+networks:
+  crcneo:
