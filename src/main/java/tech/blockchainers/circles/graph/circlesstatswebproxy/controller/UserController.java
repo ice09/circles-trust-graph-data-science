@@ -22,12 +22,18 @@ public class UserController {
     private Collection<Map<String, Object>> cachedBet;
     private Collection<Map<String, Object>> cachedSim;
     private Collection<Map<String, Object>> cachedPagerank;
+    private Collection<Map<String, Object>> cachedBetStats;
+    private Collection<Map<String, Object>> cachedSimStats;
+    private Collection<Map<String, Object>> cachedPagerankStats;
 
     public UserController(UserService userService) {
         this.userService = userService;
         this.cachedSim = new ArrayList<>();
         this.cachedBet = new ArrayList<>();
         this.cachedPagerank = new ArrayList<>();
+        this.cachedSimStats = new ArrayList<>();
+        this.cachedBetStats = new ArrayList<>();
+        this.cachedPagerankStats = new ArrayList<>();
     }
 
     @GetMapping("/recommendations/{name}")
@@ -58,7 +64,16 @@ public class UserController {
     @GetMapping("/similarity/reset")
     public ResponseEntity<Void> resetSimilarity() {
         cachedSim.clear();
+        cachedSimStats.clear();
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/similarity/stats")
+    public Collection<Map<String, Object>> statsSimilarity() {
+        if (cachedSimStats.isEmpty()) {
+            cachedSimStats = userService.readSimilarityJaccStats();
+        }
+        return cachedSimStats;
     }
 
     @GetMapping("/similarity")
@@ -79,9 +94,18 @@ public class UserController {
         }
     }
 
+    @GetMapping("/pagerank/stats")
+    public Collection<Map<String, Object>> pagerankStats() {
+        if (cachedPagerankStats.isEmpty()) {
+            cachedPagerankStats = userService.readPagerankStats();
+        }
+        return cachedPagerankStats;
+    }
+
     @GetMapping("/pagerank/reset")
     public ResponseEntity<Void> resetPagerank() {
         cachedPagerank.clear();
+        cachedPagerankStats.clear();
         return ResponseEntity.ok().build();
     }
 
@@ -106,7 +130,16 @@ public class UserController {
     @GetMapping("/betweenness/reset")
     public ResponseEntity<Void> resetBetweenness() {
         cachedBet.clear();
+        cachedBetStats.clear();
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/betweenness/stats")
+    public Collection<Map<String, Object>> statsBetweenness() {
+        if (cachedBetStats.isEmpty()) {
+            cachedBetStats = userService.readBetweennessStats();
+        }
+        return cachedBetStats;
     }
 
     @GetMapping("/betweenness")

@@ -50,10 +50,41 @@ public class UserService {
         return col;
     }
 
+    public Collection<Map<String, Object>> readPagerankStats() {
+        String query = """
+                CALL gds.pageRank.stats('circles', {
+                    maxIterations: 20,
+                    dampingFactor: 0.85
+                })
+                YIELD centralityDistribution
+                RETURN centralityDistribution
+                """;
+        Collection<Map<String, Object>> col =
+                neo4jClient
+                        .query(query)
+                        .fetch()
+                        .all();
+        return col;
+    }
+
     public Collection<Map<String, Object>> readBetweenness() {
         String query = """
                 CALL gds.betweenness.stream('circles') YIELD nodeId, score
                 RETURN gds.util.asNode(nodeId).address AS address, gds.util.asNode(nodeId).name AS name, score ORDER BY score DESC, name ASC
+                """;
+        Collection<Map<String, Object>> col =
+                neo4jClient
+                        .query(query)
+                        .fetch()
+                        .all();
+        return col;
+    }
+
+    public Collection<Map<String, Object>> readBetweennessStats() {
+        String query = """
+                CALL gds.betweenness.stats('circles')
+                YIELD centralityDistribution
+                RETURN centralityDistribution                
                 """;
         Collection<Map<String, Object>> col =
                 neo4jClient
@@ -76,6 +107,21 @@ public class UserService {
                         .all();
         return col;
     }
+
+    public Collection<Map<String, Object>> readSimilarityJaccStats() {
+        String query = """
+                CALL gds.nodeSimilarity.stats('circles')
+                YIELD similarityDistribution
+                RETURN similarityDistribution
+        """;
+        Collection<Map<String, Object>> col =
+                neo4jClient
+                        .query(query)
+                        .fetch()
+                        .all();
+        return col;
+    }
+
     public Collection<FlatUser> readTrustersForUser(String name) {
         Collection<FlatUser> col =
                 neo4jClient
