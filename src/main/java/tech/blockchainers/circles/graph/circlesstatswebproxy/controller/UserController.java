@@ -69,7 +69,7 @@ public class UserController {
         if (StringUtils.hasText(name)) {
             List<Map<String, Object>> filteredForName = new ArrayList<>();
             for (Map<String, Object> map : cachedSim) {
-                if (map.get("User1").toString().equals(name) || map.get("User2").toString().equals(name)) {
+                if ((map.get("user1Name") != null) && map.get("user1Name").toString().equals(name) || ((map.get("user2Name") != null) && map.get("user2Name").toString().equals(name))) {
                     filteredForName.add(map);
                 }
             }

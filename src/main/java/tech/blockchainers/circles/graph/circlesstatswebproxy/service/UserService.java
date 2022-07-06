@@ -50,22 +50,6 @@ public class UserService {
         return col;
     }
 
-    public Collection<Map<String, Object>> readPagerankNames() {
-        String query = """
-                CALL gds.pageRank.stream('circles')
-                YIELD nodeId, score
-                WHERE gds.util.asNode(nodeId).name IS NOT NULL AND NOT gds.util.asNode(nodeId).name STARTS WITH '0x'
-                RETURN gds.util.asNode(nodeId).name AS name, score
-                ORDER BY score DESC, name ASC
-        """;
-        Collection<Map<String, Object>> col =
-                neo4jClient
-                        .query(query)
-                        .fetch()
-                        .all();
-        return col;
-    }
-
     public Collection<Map<String, Object>> readBetweenness() {
         String query = """
                 CALL gds.betweenness.stream('circles') YIELD nodeId, score
@@ -79,26 +63,11 @@ public class UserService {
         return col;
     }
 
-    public Collection<Map<String, Object>> readBetweennessNames() {
-        String query = """
-                CALL gds.betweenness.stream('circles') YIELD nodeId, score
-                WHERE gds.util.asNode(nodeId).name IS NOT NULL AND NOT gds.util.asNode(nodeId).name STARTS WITH '0x'
-                RETURN gds.util.asNode(nodeId).name AS name, score ORDER BY score DESC, name ASC
-                """;
-        Collection<Map<String, Object>> col =
-                neo4jClient
-                        .query(query)
-                        .fetch()
-                        .all();
-        return col;
-    }
-
     public Collection<Map<String, Object>> readSimilarityJacc() {
         String query = """
                 CALL gds.nodeSimilarity.stream('circles') YIELD node1, node2, similarity
-                WHERE gds.util.asNode(node1).name IS NOT NULL AND NOT gds.util.asNode(node1).name STARTS WITH '0x' AND gds.util.asNode(node2).name IS NOT NULL AND NOT gds.util.asNode(node2).name STARTS WITH '0x'
-                RETURN gds.util.asNode(node1).name AS User1, gds.util.asNode(node2).name AS User2, similarity
-                ORDER BY similarity DESCENDING, User1, User2
+                RETURN gds.util.asNode(node1).address AS user1Addr, gds.util.asNode(node1).name AS user1Name, gds.util.asNode(node2).address AS user2Addr, gds.util.asNode(node2).name AS user2Name, similarity
+                ORDER BY similarity DESCENDING, user1Name, user2Name
         """;
         Collection<Map<String, Object>> col =
                 neo4jClient
