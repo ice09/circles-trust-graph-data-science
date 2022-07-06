@@ -122,6 +122,17 @@ ORDER BY score DESC, name ASC
 ```
 * see https://neo4j.com/docs/graph-data-science/current/algorithms/page-rank/
 
+**Pagerank Stats**: `GET /pagerank/stats`
+
+*Cypher*
+```
+CALL gds.pageRank.stats('circles', {
+    maxIterations: 20,
+    dampingFactor: 0.85
+})
+YIELD centralityDistribution
+```
+
 **Node Similarity**: `GET /similarity?name=username`
 
 *Cypher*
@@ -133,6 +144,14 @@ ORDER BY similarity DESCENDING, User1, User2
 
 * see https://neo4j.com/docs/graph-data-science/current/algorithms/betweenness-centrality/
 
+**Similarity Stats**: `GET /similarity/stats`
+
+*Cypher*
+```
+CALL gds.nodeSimilarity.stats('circles')
+YIELD similarityDistribution
+```
+
 **Betweeness**: `GET /betweenness?name=username`
 
 *Cypher*
@@ -142,6 +161,14 @@ RETURN gds.util.asNode(nodeId).name AS name, score ORDER  BY name ASC
 ```
 
 * see https://neo4j.com/docs/graph-data-science/current/algorithms/node-similarity/
+
+**Betweenness Stats**: `GET /betweenness/stats`
+
+*Cypher*
+```
+CALL gds.betweenness.stats('circles')
+YIELD centralityDistribution
+```
 
 ### References
 
