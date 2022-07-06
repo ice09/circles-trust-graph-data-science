@@ -1,5 +1,6 @@
 package tech.blockchainers.circles.graph.circlesstatswebproxy.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,9 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+        this.cachedSim = new ArrayList<>();
+        this.cachedBet = new ArrayList<>();
+        this.cachedPagerank = new ArrayList<>();
     }
 
     @GetMapping("/recommendations/{name}")
@@ -51,9 +55,15 @@ public class UserController {
         return userService.readTrusteesForUser(name);
     }
 
+    @GetMapping("/similarity/reset")
+    public ResponseEntity<Void> resetSimilarity() {
+        cachedSim.clear();
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/similarity")
     public Collection<Map<String, Object>> similarity(@RequestParam(value = "name", required = false) String name) {
-        if (cachedSim == null) {
+        if (cachedSim.isEmpty()) {
             cachedSim = userService.readSimilarityJacc();
         }
         if (StringUtils.hasText(name)) {
@@ -69,9 +79,15 @@ public class UserController {
         }
     }
 
+    @GetMapping("/pagerank/reset")
+    public ResponseEntity<Void> resetPagerank() {
+        cachedPagerank.clear();
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/pagerank")
     public Collection<Map<String, Object>> readPagerank(@RequestParam(value = "name",required = false) String name) {
-        if (cachedPagerank == null) {
+        if (cachedPagerank.isEmpty()) {
             cachedPagerank = userService.readPagerank();
         }
         if (StringUtils.hasText(name)) {
@@ -87,9 +103,15 @@ public class UserController {
         }
     }
 
+    @GetMapping("/betweenness/reset")
+    public ResponseEntity<Void> resetBetweenness() {
+        cachedBet.clear();
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/betweenness")
     public Collection<Map<String, Object>> readBetweenness(@RequestParam(value = "name",required = false) String name) {
-        if (cachedBet == null) {
+        if (cachedBet.isEmpty()) {
             cachedBet = userService.readBetweenness();
         }
         if (StringUtils.hasText(name)) {
