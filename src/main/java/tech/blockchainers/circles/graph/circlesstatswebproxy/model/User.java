@@ -1,6 +1,7 @@
 package tech.blockchainers.circles.graph.circlesstatswebproxy.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.voodoodyne.jackson.jsog.JSOGGenerator;
 import org.springframework.data.neo4j.core.schema.*;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 @JsonIdentityInfo(generator = JSOGGenerator.class)
 @Node
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
 
     @Id

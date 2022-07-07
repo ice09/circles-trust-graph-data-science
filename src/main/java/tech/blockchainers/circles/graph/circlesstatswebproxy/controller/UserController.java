@@ -31,6 +31,9 @@ public class UserController {
     private Collection<Map<String, Object>> cachedBetStats;
     private Collection<Map<String, Object>> cachedSimStats;
     private Collection<Map<String, Object>> cachedPagerankStats;
+    private long processingSimStarted;
+    private long processingBetStarted;
+    private long processingPagerankStarted;
     private long processingSimStatsStarted;
     private long processingBetStatsStarted;
     private long processingPagerankStatsStarted;
@@ -118,19 +121,28 @@ public class UserController {
 
     @GetMapping("/similarity")
     public Collection<Map<String, Object>> similarity(@RequestParam(value = "name", required = false) String name) {
-        if (cachedSim.isEmpty()) {
-            cachedSim = userService.readSimilarityJacc();
+        if (processingSimStarted > 0) {
+            Map<String, Object> wait = Map.of("PROCESSING", Date.from(Instant.ofEpochMilli(processingSimStarted)));
+            return List.of(wait);
         }
-        if (StringUtils.hasText(name)) {
-            List<Map<String, Object>> filteredForName = new ArrayList<>();
-            for (Map<String, Object> map : cachedSim) {
-                if ((map.get("user1Name") != null) && map.get("user1Name").toString().equals(name) || ((map.get("user2Name") != null) && map.get("user2Name").toString().equals(name))) {
-                    filteredForName.add(map);
-                }
+        try {
+            if (cachedSim.isEmpty()) {
+                processingSimStarted = Instant.now().toEpochMilli();
+                cachedSim = userService.readSimilarityJacc();
             }
-            return filteredForName;
-        } else {
-            return cachedSim;
+            if (StringUtils.hasText(name)) {
+                List<Map<String, Object>> filteredForName = new ArrayList<>();
+                for (Map<String, Object> map : cachedSim) {
+                    if ((map.get("user1Name") != null) && map.get("user1Name").toString().equals(name) || ((map.get("user2Name") != null) && map.get("user2Name").toString().equals(name))) {
+                        filteredForName.add(map);
+                    }
+                }
+                return filteredForName;
+            } else {
+                return cachedSim;
+            }
+        } finally {
+            processingSimStarted = 0;
         }
     }
 
@@ -160,19 +172,28 @@ public class UserController {
 
     @GetMapping("/pagerank")
     public Collection<Map<String, Object>> readPagerank(@RequestParam(value = "name",required = false) String name) {
-        if (cachedPagerank.isEmpty()) {
-            cachedPagerank = userService.readPagerank();
+        if (processingPagerankStarted > 0) {
+            Map<String, Object> wait = Map.of("PROCESSING", Date.from(Instant.ofEpochMilli(processingPagerankStarted)));
+            return List.of(wait);
         }
-        if (StringUtils.hasText(name)) {
-            List<Map<String, Object>> filteredForName = new ArrayList<>();
-            for (Map<String, Object> map : cachedPagerank) {
-                if (map.containsKey("name") && map.get("name")!= null && map.get("name").toString().equals(name)) {
-                    filteredForName.add(map);
-                }
+        try {
+            if (cachedPagerank.isEmpty()) {
+                processingPagerankStarted = Instant.now().toEpochMilli();
+                cachedPagerank = userService.readPagerank();
             }
-            return filteredForName;
-        } else {
-            return cachedPagerank;
+            if (StringUtils.hasText(name)) {
+                List<Map<String, Object>> filteredForName = new ArrayList<>();
+                for (Map<String, Object> map : cachedPagerank) {
+                    if (map.containsKey("name") && map.get("name") != null && map.get("name").toString().equals(name)) {
+                        filteredForName.add(map);
+                    }
+                }
+                return filteredForName;
+            } else {
+                return cachedPagerank;
+            }
+        } finally {
+            processingPagerankStarted = 0;
         }
     }
 
@@ -202,19 +223,28 @@ public class UserController {
 
     @GetMapping("/betweenness")
     public Collection<Map<String, Object>> readBetweenness(@RequestParam(value = "name",required = false) String name) {
-        if (cachedBet.isEmpty()) {
-            cachedBet = userService.readBetweenness();
+        if (processingBetStarted > 0) {
+            Map<String, Object> wait = Map.of("PROCESSING", Date.from(Instant.ofEpochMilli(processingBetStarted)));
+            return List.of(wait);
         }
-        if (StringUtils.hasText(name)) {
-            List<Map<String, Object>> filteredForName = new ArrayList<>();
-            for (Map<String, Object> map : cachedBet) {
-                if ((map.get("name") != null) && map.get("name").toString().equals(name)) {
-                    filteredForName.add(map);
-                }
+        try {
+            if (cachedBet.isEmpty()) {
+                processingBetStarted = Instant.now().toEpochMilli();
+                cachedBet = userService.readBetweenness();
             }
-            return filteredForName;
-        } else {
-            return cachedBet;
+            if (StringUtils.hasText(name)) {
+                List<Map<String, Object>> filteredForName = new ArrayList<>();
+                for (Map<String, Object> map : cachedBet) {
+                    if ((map.get("name") != null) && map.get("name").toString().equals(name)) {
+                        filteredForName.add(map);
+                    }
+                }
+                return filteredForName;
+            } else {
+                return cachedBet;
+            }
+        } finally {
+            processingBetStarted = 0;
         }
     }
 
