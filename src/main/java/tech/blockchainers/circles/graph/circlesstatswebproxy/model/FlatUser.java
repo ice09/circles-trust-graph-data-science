@@ -1,24 +1,27 @@
 package tech.blockchainers.circles.graph.circlesstatswebproxy.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.voodoodyne.jackson.jsog.JSOGGenerator;
 import org.springframework.data.neo4j.core.schema.*;
 
 import java.util.List;
 
-@JsonIdentityInfo(generator = JSOGGenerator.class)
 @Node
+@JsonIdentityInfo(generator = JSOGGenerator.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FlatUser {
 
     @Id
     @GeneratedValue
-    Long id;
+    @JsonIgnore
+    private Long id;
 
     private String address;
 
     private String name;
 
-    @Property("image_url")
     private String imageUrl;
 
     @Relationship(type = "TRUSTS", direction = Relationship.Direction.OUTGOING)
@@ -42,8 +45,13 @@ public class FlatUser {
     public FlatUser(String address, String name, String imageUrl, List<FlatUser> trusters) {
         this.address = address;
         this.name = name;
-        this.imageUrl = imageUrl;
+        this.imageUrl = ((imageUrl == null) || ("null".equals(imageUrl))) ? null : imageUrl;
         this.trusters = trusters;
+    }
+    public FlatUser(String address, String name, String imageUrl) {
+        this.address = address;
+        this.name = name;
+        this.imageUrl = ((imageUrl == null) || ("null".equals(imageUrl))) ? null : imageUrl;
     }
 
     public FlatUser(String name) {

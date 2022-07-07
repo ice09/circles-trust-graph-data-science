@@ -1,5 +1,6 @@
 package tech.blockchainers.circles.graph.circlesstatswebproxy.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,12 +11,17 @@ import tech.blockchainers.circles.graph.circlesstatswebproxy.model.FlatUser;
 import tech.blockchainers.circles.graph.circlesstatswebproxy.model.User;
 import tech.blockchainers.circles.graph.circlesstatswebproxy.service.UserService;
 
+import javax.annotation.PostConstruct;
+import java.sql.Date;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -25,6 +31,9 @@ public class UserController {
     private Collection<Map<String, Object>> cachedBetStats;
     private Collection<Map<String, Object>> cachedSimStats;
     private Collection<Map<String, Object>> cachedPagerankStats;
+    private long processingSimStatsStarted;
+    private long processingBetStatsStarted;
+    private long processingPagerankStatsStarted;
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -34,6 +43,28 @@ public class UserController {
         this.cachedSimStats = new ArrayList<>();
         this.cachedBetStats = new ArrayList<>();
         this.cachedPagerankStats = new ArrayList<>();
+    }
+    @PostConstruct
+    public void setup() {
+        CompletableFuture.runAsync(() -> initCaches());
+    }
+
+    private void initCaches() {
+        log.info("[SETUP] Create Projection");
+        userService.createProjection();
+        log.info("[SETUP] Cache Similarity Stats");
+        statsSimilarity();
+        log.info("[SETUP] Cache Betweenness Stats");
+        statsBetweenness();
+        log.info("[SETUP] Cache Pagerank Stats");
+        statsPagerank();
+        log.info("[SETUP] Cache Similarity");
+        similarity(null);
+        log.info("[SETUP] Cache Betweenness Stats");
+        readBetweenness(null);
+        log.info("[SETUP] Cache Pagerank Stats");
+        readPagerank(null);
+        log.info("[SETUP] Setup completed");
     }
 
     @GetMapping("/recommendations/{name}")
@@ -70,8 +101,17 @@ public class UserController {
 
     @GetMapping("/similarity/stats")
     public Collection<Map<String, Object>> statsSimilarity() {
-        if (cachedSimStats.isEmpty()) {
-            cachedSimStats = userService.readSimilarityJaccStats();
+        if (processingSimStatsStarted > 0) {
+            Map<String, Object> wait = Map.of("PROCESSING", Date.from(Instant.ofEpochMilli(processingSimStatsStarted)));
+            return List.of(wait);
+        }
+        try {
+            if (cachedSimStats.isEmpty()) {
+                processingSimStatsStarted = Instant.now().toEpochMilli();
+                cachedSimStats = userService.readSimilarityJaccStats();
+            }
+        } finally {
+            processingSimStatsStarted = 0;
         }
         return cachedSimStats;
     }
@@ -95,9 +135,18 @@ public class UserController {
     }
 
     @GetMapping("/pagerank/stats")
-    public Collection<Map<String, Object>> pagerankStats() {
-        if (cachedPagerankStats.isEmpty()) {
-            cachedPagerankStats = userService.readPagerankStats();
+    public Collection<Map<String, Object>> statsPagerank() {
+        if (processingPagerankStatsStarted > 0) {
+            Map<String, Object> wait = Map.of("PROCESSING", Date.from(Instant.ofEpochMilli(processingPagerankStatsStarted)));
+            return List.of(wait);
+        }
+        try {
+            if (cachedPagerankStats.isEmpty()) {
+                processingPagerankStatsStarted = Instant.now().toEpochMilli();
+                cachedPagerankStats = userService.readPagerankStats();
+            }
+        } finally {
+            processingPagerankStatsStarted = 0;
         }
         return cachedPagerankStats;
     }
@@ -136,8 +185,17 @@ public class UserController {
 
     @GetMapping("/betweenness/stats")
     public Collection<Map<String, Object>> statsBetweenness() {
-        if (cachedBetStats.isEmpty()) {
-            cachedBetStats = userService.readBetweennessStats();
+        if (processingBetStatsStarted > 0) {
+            Map<String, Object> wait = Map.of("PROCESSING", Date.from(Instant.ofEpochMilli(processingBetStatsStarted)));
+            return List.of(wait);
+        }
+        try {
+            if (cachedBetStats.isEmpty()) {
+                processingBetStatsStarted = Instant.now().toEpochMilli();
+                cachedBetStats = userService.readBetweennessStats();
+            }
+        } finally {
+            processingBetStatsStarted = 0;
         }
         return cachedBetStats;
     }

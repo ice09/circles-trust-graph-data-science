@@ -1,7 +1,9 @@
 package tech.blockchainers.circles.graph.circlesstatswebproxy.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.neo4j.driver.types.Node;
 import org.neo4j.driver.types.TypeSystem;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.stereotype.Service;
 import tech.blockchainers.circles.graph.circlesstatswebproxy.model.FlatUser;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -22,6 +25,18 @@ public class UserService {
         this.userRepository = userRepository;
         this.neo4jClient = neo4jClient;
     }
+
+    public void createProjection() {
+        String query = """
+                CALL gds.graph.create('circles', 'User', 'TRUSTS')
+                """;
+        try {
+            neo4jClient.query(query).run();
+        } catch (InvalidDataAccessResourceUsageException ex) {
+            log.error("Projection cannot be created, does it exist already?");
+        }
+    }
+
 
     public List<User> readUserGraph(String name) {
         return userRepository.triadicClosureForUser(name);
@@ -129,11 +144,11 @@ public class UserService {
                         .bind(name).to("name")
                         .fetchAs(FlatUser.class).mappedBy((TypeSystem t, org.neo4j.driver.Record record) -> {
                             List<FlatUser> trusters = record.get("trusters")
-                                    .asList(v -> new FlatUser(v.get("address").asString(), v.get("name").asString()));
+                                    .asList(v -> new FlatUser(v.get("address").asString(), v.get("name").asString(), v.get("image_url").asString()));
                             Node node = record.get("trustee").asNode();
                             String addr = node.get("address").asString();
                             String uname = node.get("name").asString();
-                            String imageUrl = node.get("imageUrl").asString();
+                            String imageUrl = node.get("image_url").asString();
                             return new FlatUser(addr, uname, imageUrl, trusters);
                         }).all();
         return col;
@@ -145,13 +160,13 @@ public class UserService {
                         .query("MATCH (u1:User)-[:TRUSTS]->(u2:User) WHERE u1.name=$name RETURN u1 as truster, collect(u2) as trustees")
                         .bind(name).to("name")
                         .fetchAs(FlatUser.class).mappedBy((TypeSystem t, org.neo4j.driver.Record record) -> {
-                            List<FlatUser> trusters = record.get("trustees")
-                                    .asList(v -> new FlatUser(v.get("address").asString(), v.get("name").asString()));
+                            List<FlatUser> trustees = record.get("trustees")
+                                    .asList(v -> new FlatUser(v.get("address").asString(), v.get("name").asString(), v.get("image_url").asString()));
                             Node node = record.get("truster").asNode();
                             String addr = node.get("address").asString();
                             String uname = node.get("name").asString();
-                            String imageUrl = node.get("imageUrl").asString();
-                            return new FlatUser(addr, uname, imageUrl, trusters);
+                            String imageUrl = node.get("image_url").asString();
+                            return new FlatUser(addr, uname, imageUrl, trustees);
                         }).all();
         return col;
     }
