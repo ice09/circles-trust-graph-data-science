@@ -68,7 +68,7 @@ public class UserController {
     }
 
     @GetMapping("/recommendations/{name}")
-    public List<User> trustGraphForUser(@RequestParam("name") String name) {
+    public List<User> trustGraphForUser(@PathVariable("name") String name) {
         return userService.readUserGraph(name);
     }
 
@@ -83,12 +83,12 @@ public class UserController {
     }
 
     @GetMapping("/trusters/{name}")
-    public Collection<FlatUser> trustersForUser(@RequestParam("name") String name) {
+    public Collection<FlatUser> trustersForUser(@PathVariable("name") String name) {
         return userService.readTrustersForUser(name);
     }
 
     @GetMapping("/trustees/{name}")
-    public Collection<FlatUser> trusteesForUser(@RequestParam("name") String name) {
+    public Collection<FlatUser> trusteesForUser(@PathVariable("name") String name) {
         return userService.readTrusteesForUser(name);
     }
 
