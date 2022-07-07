@@ -63,9 +63,9 @@ public class UserController {
         statsPagerank();
         log.info("[SETUP] Cache Similarity");
         similarity(null);
-        log.info("[SETUP] Cache Betweenness Stats");
+        log.info("[SETUP] Cache Betweenness");
         readBetweenness(null);
-        log.info("[SETUP] Cache Pagerank Stats");
+        log.info("[SETUP] Cache Pagerank");
         readPagerank(null);
         log.info("[SETUP] Setup completed");
     }
