@@ -33,5 +33,4 @@ public interface UserRepository extends Neo4jRepository<User, Long> {
     """)
     List<User> shortestPathAddr(@Param("SENDER") String senderAddr, @Param("RECEIVER") String receiverAddr);
 
-
 }

@@ -1,6 +1,7 @@
 package tech.blockchainers.circles.graph.circlesstatswebproxy.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.neo4j.driver.internal.InternalPath;
 import org.neo4j.driver.types.Node;
 import org.neo4j.driver.types.TypeSystem;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
@@ -10,9 +11,7 @@ import tech.blockchainers.circles.graph.circlesstatswebproxy.model.FlatUser;
 import tech.blockchainers.circles.graph.circlesstatswebproxy.model.User;
 import tech.blockchainers.circles.graph.circlesstatswebproxy.repository.UserRepository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -46,8 +45,51 @@ public class UserService {
         return userRepository.shortestPathNames(sender, receiver);
     }
 
-    public List<User> calcPathAddr(String sender, String receiver) {
+    public List<User> calcPathAddrs(String sender, String receiver) {
         return userRepository.shortestPathAddr(sender, receiver);
+    }
+
+    public List<List<Map<String, String>>> calcAllPathNames(String sender, String receiver) {
+        String query = """
+            MATCH path = ( (you:User {name:$SENDER})-[*1..4]->(other:User {name:$RECEIVER}) )
+            WHERE all(r IN relationships(path) WHERE (r.amount>0))
+            AND size(apoc.coll.toSet(NODES(path))) = size(NODES(path))
+            RETURN path
+            LIMIT 1000
+        """;
+        return createUserPathList(query, sender, receiver);
+    }
+
+    public List<List<Map<String, String>>> calcAllPathAddrs(String sender, String receiver) {
+        String query = """
+            MATCH path = ( (you:User {address:$SENDER})-[*1..4]->(other:User {address:$RECEIVER}) )
+            WHERE all(r IN relationships(path) WHERE (r.amount>0))
+            AND size(apoc.coll.toSet(NODES(path))) = size(NODES(path))
+            RETURN path
+            LIMIT 1000
+        """;
+        return createUserPathList(query, sender, receiver);
+    }
+
+    private List<List<Map<String, String>>> createUserPathList(String query, String sender, String receiver) {
+        Collection<Map<String, Object>> col =
+                neo4jClient
+                        .query(query)
+                        .bind(sender).to("SENDER")
+                        .bind(receiver).to("RECEIVER")
+                        .fetch()
+                        .all();
+        List<List<Map<String, String>>> mappedPaths = new ArrayList<>();
+        for (Map<String, Object> entry : col) {
+            InternalPath pathEntry = (InternalPath)entry.get("path");
+            List<Map<String, String>> onePath = new ArrayList<>();
+            for (Node user : pathEntry.nodes()) {
+                Map<String, String> userMap = Map.of(user.get("address").asString(), user.get("name").asString());
+                onePath.add(userMap);
+            }
+            mappedPaths.add(onePath);
+        }
+        return mappedPaths;
     }
 
     public Collection<Map<String, Object>> readPagerank() {

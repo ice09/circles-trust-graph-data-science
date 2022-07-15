@@ -75,14 +75,25 @@ public class UserController {
         return userService.readUserGraph(name);
     }
 
+
+    @GetMapping("/allpaths/names/{sender}/{receiver}")
+    public List<List<Map<String, String>>> allPathsForNames(@PathVariable("sender") String sender, @PathVariable("receiver") String receiver) {
+        return userService.calcAllPathNames(sender, receiver);
+    }
+
+    @GetMapping("/allpaths/addrs/{sender}/{receiver}")
+    public List<List<Map<String, String>>> allPathsForAddrs(@PathVariable("sender") String sender, @PathVariable("receiver") String receiver) {
+        return userService.calcAllPathAddrs(sender, receiver);
+    }
+
     @GetMapping("/path/names/{sender}/{receiver}")
     public List<User> pathForNames(@PathVariable("sender") String sender, @PathVariable("receiver") String receiver) {
         return userService.calcPathNames(sender, receiver);
     }
 
-    @GetMapping("/path/addr/{sender}/{receiver}")
+    @GetMapping("/path/addrs/{sender}/{receiver}")
     public List<User> pathForAddr(@PathVariable("sender") String sender, @PathVariable("receiver") String receiver) {
-        return userService.calcPathAddr(sender, receiver);
+        return userService.calcPathAddrs(sender, receiver);
     }
 
     @GetMapping("/trusters/{name}")
