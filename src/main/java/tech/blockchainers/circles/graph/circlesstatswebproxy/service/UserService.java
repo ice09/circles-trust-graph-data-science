@@ -27,12 +27,12 @@ public class UserService {
 
     public void createProjection() {
         String query = """
-                CALL gds.graph.create('circles', 'User', 'TRUSTS')
+                CALL gds.graph.project('circles', 'User', 'TRUSTS')
                 """;
         try {
             neo4jClient.query(query).run();
         } catch (InvalidDataAccessResourceUsageException ex) {
-            log.error("Projection cannot be created, does it exist already?");
+            log.error("Projection cannot be created, does it exist already?", ex);
         }
     }
 

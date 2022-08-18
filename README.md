@@ -12,7 +12,7 @@ This repository contains a `docker-compose.yml` with
 ## Run
 
 * `cd docker`
-* Run `docker-compose -d`
+* Run `docker-compose -p circles-staging -d up`
 
 ## Setup
 
@@ -106,7 +106,7 @@ RETURN nodes(path)
 
 ### Graph Data Science (GDS)
 
-#### Initial  Setup: Create GDS Projection
+#### Initial  Setup: Create GDS Projection (v4.4+ vs 4.3)
 `CALL gds.graph.create('circles', 'User', 'TRUSTS')`
 OR
 `CALL gds.graph.project('circles', 'User', 'TRUSTS')`
@@ -222,4 +222,3 @@ MERGE (u2:User {address: row.trustee_address})
 SET u2.name = row.trustee_name, u2.image_url = row.trustee_image_url
 MERGE (u1)-[r:TRUSTS]->(u2)
 SET r.blockNumber = toInteger(row.blockNumber), r.amount = toFloat(row.amount);
-  
