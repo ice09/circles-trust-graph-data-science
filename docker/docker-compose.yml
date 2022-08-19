@@ -1,8 +1,9 @@
-version: '3'
+version: '3.4'
 
 services:
   neo4j:
     image: neo4j:latest
+    restart: unless-stopped
     ports:
       - "127.0.0.1:7474:7474"
       - "127.0.0.1:7687:7687"
@@ -17,10 +18,19 @@ services:
       - ./volume/plugins:/plugins
       - ./volume/data:/data
       - ./volume/import:/import
+    healthcheck:
+      test: [ "CMD", "/var/lib/neo4j/bin/cypher-shell", "-u", "neo4j", "-p", "q", "MATCH () RETURN count(*) as count" ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
     networks:
       - crcneo
   circles:
     image: circles-stats-web-proxy:0.0.1-SNAPSHOT
+    restart: always
+    depends_on:
+      neo4j:
+        condition: service_healthy
     ports:
       - "8080:8080"
     networks:
