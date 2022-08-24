@@ -51,7 +51,7 @@ public class UserService {
 
     public List<List<Map<String, String>>> calcAllPathNames(String sender, String receiver) {
         String query = """
-            MATCH path = ( (you:User {name:$SENDER})-[*1..4]->(other:User {name:$RECEIVER}) )
+            MATCH path = ( (you:User {name:$SENDER})<-[*1..4]-(other:User {name:$RECEIVER}) )
             WHERE all(r IN relationships(path) WHERE (r.amount>0))
             AND size(apoc.coll.toSet(NODES(path))) = size(NODES(path))
             RETURN path
@@ -62,7 +62,7 @@ public class UserService {
 
     public List<List<Map<String, String>>> calcAllPathAddrs(String sender, String receiver) {
         String query = """
-            MATCH path = ( (you:User {address:$SENDER})-[*1..4]->(other:User {address:$RECEIVER}) )
+            MATCH path = ( (you:User {address:$SENDER})<-[*1..4]-(other:User {address:$RECEIVER}) )
             WHERE all(r IN relationships(path) WHERE (r.amount>0))
             AND size(apoc.coll.toSet(NODES(path))) = size(NODES(path))
             RETURN path

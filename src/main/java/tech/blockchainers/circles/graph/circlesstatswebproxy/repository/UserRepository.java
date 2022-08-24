@@ -20,14 +20,14 @@ public interface UserRepository extends Neo4jRepository<User, Long> {
     List<User> triadicClosureForUser(@Param("NAME") String name);
 
     @Query("""
-    MATCH path = shortestPath( (you:User {name:$SENDER})-[*]->(other:User {name:$RECEIVER}) )
+    MATCH path = shortestPath( (you:User {name:$SENDER})<-[*]-(other:User {name:$RECEIVER}) )
     WHERE all(r IN relationships(path) WHERE (r.amount>0))
     RETURN nodes(path)
     """)
     List<User> shortestPathNames(@Param("SENDER") String senderName, @Param("RECEIVER") String receiverName);
 
     @Query("""
-    MATCH path = shortestPath( (you:User {address:$SENDER})-[*]->(other:User {address:$RECEIVER}) )
+    MATCH path = shortestPath( (you:User {address:$SENDER})<-[*]-(other:User {address:$RECEIVER}) )
     WHERE all(r IN relationships(path) WHERE (r.amount>0))
     RETURN nodes(path)
     """)
