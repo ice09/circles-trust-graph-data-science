@@ -43,7 +43,7 @@ MERGE (u2:User {address: row.trustee_address})
 MERGE (u1)-[r:TRUSTS]->(u2)
   SET r.blockNumber = toInteger(row.blockNumber), r.amount = toFloat(row.amount);
 ```
-4. Delete **self-trust**
+4. (Optional, FYI!) Delete **self-trust**
 ```
 MATCH (u1:User)-[t:TRUSTS]->(u2:User)
 WHERE (u1.address = u2.address)
